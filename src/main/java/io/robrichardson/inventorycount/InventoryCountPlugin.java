@@ -5,10 +5,8 @@ import javax.inject.Inject;
 import com.google.inject.Provides;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.events.ClientTick;
-import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.*;
+import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -18,8 +16,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ImageUtil;
 import java.awt.image.BufferedImage;
-import java.time.Duration;
-import java.time.Instant;
+import java.util.Arrays;
 
 @Slf4j
 @PluginDescriptor(
@@ -42,30 +39,37 @@ public class InventoryCountPlugin extends Plugin
 	@Inject
 	private InventoryCountConfig config;
 
-//	private static final BufferedImage INVENTORY_IMAGE;
+	private static final BufferedImage INVENTORY_IMAGE;
 
-	private boolean active = false;
+	private static final int INVENTORY_SIZE = 28;
 
-//	static
-//	{
-//		INVENTORY_IMAGE = ImageUtil.loadImageResource(InventoryCountPlugin.class, "inventory_icon.png");
-//	}
+	@Getter
+	private InventoryCountInfoBox inventoryCountInfoBox;
+
+	static
+	{
+		INVENTORY_IMAGE = ImageUtil.loadImageResource(InventoryCountPlugin.class, "inventory_icon.png");
+	}
 
 	@Override
 	protected void startUp() throws Exception
 	{
-		active = true;
-		if (config.renderOnInventory())
+		if (config.renderOnInventory())  {
 			overlayManager.add(overlay);
+			updateOverlays();
+		} else {
+			addInfoBox();
+		}
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		active = false;
-//		lastIdleTicks = -1;
-//		removeTimer();
-		overlayManager.remove(overlay);
+		if (config.renderOnInventory())  {
+			overlayManager.remove(overlay);
+		} else {
+			removeInfoBox();
+		}
 	}
 
 	@Subscribe
@@ -74,14 +78,12 @@ public class InventoryCountPlugin extends Plugin
 
 		if ("renderOnInventory".equals(event.getKey())) {
 			if (config.renderOnInventory()) {
+				removeInfoBox();
 				overlayManager.add(overlay);
-//				removeTimer();
+				updateOverlays();
 			} else {
 				overlayManager.remove(overlay);
-
-				// emulate infobox timer creation similar to onClientTick does
-//				final long durationMillis = (AFK_LOG_TICKS - getIdleTicks()) * AFK_LOG_TIME.toMillis() / AFK_LOG_TICKS + 999;
-//				setTimer(Duration.ofMillis(durationMillis));
+				addInfoBox();
 			}
 		}
 	}
@@ -92,13 +94,46 @@ public class InventoryCountPlugin extends Plugin
 		return configManager.getConfig(InventoryCountConfig.class);
 	}
 
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	private void addInfoBox()
 	{
-//		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-//		{
-//			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
-//		}
+		inventoryCountInfoBox = new InventoryCountInfoBox(INVENTORY_IMAGE, this);
+		updateOverlays();
+		infoBoxManager.addInfoBox(inventoryCountInfoBox);
 	}
 
+	private void removeInfoBox()
+	{
+		infoBoxManager.removeInfoBox(inventoryCountInfoBox);
+		inventoryCountInfoBox = null;
+	}
+
+	private void updateOverlays()
+	{
+		String text = String.valueOf(openInventorySpaces());
+		if(config.renderOnInventory())
+		{
+			overlay.setText(text);
+		}
+		else
+		{
+			inventoryCountInfoBox.setText(text);
+		}
+	}
+
+	private int openInventorySpaces()
+	{
+		ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+		Item[] items = container == null ? new Item[0] : container.getItems();
+		int usedSpaces = (int) Arrays.stream(items).filter(p -> p.getId() != -1).count();
+		return INVENTORY_SIZE - usedSpaces;
+	}
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged event)
+	{
+		if (event.getContainerId() == InventoryID.INVENTORY.getId())
+		{
+			updateOverlays();
+		}
+	}
 }

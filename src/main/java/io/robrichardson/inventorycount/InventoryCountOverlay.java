@@ -26,6 +26,8 @@ public class InventoryCountOverlay extends Overlay {
     private final InventoryCountConfig config;
     private final ConfigManager configManager;
 
+    private String _text;
+
     @Inject
     public InventoryCountOverlay(Client client, InventoryCountPlugin plugin, InventoryCountConfig config, ConfigManager configManager) {
         super(plugin);
@@ -45,13 +47,13 @@ public class InventoryCountOverlay extends Overlay {
         if (client.isResized()) {
             toDrawOn = client.getWidget(WidgetInfo.RESIZABLE_VIEWPORT_INVENTORY_TAB);
             if (toDrawOn == null || toDrawOn.isHidden())
-                toDrawOn = client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_STONES_WIDGET);
+                toDrawOn = client.getWidget(WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
         } else {
             toDrawOn = client.getWidget(WidgetInfo.FIXED_VIEWPORT_INVENTORY_TAB);
         }
         if (toDrawOn == null || toDrawOn.isHidden()) return null;
 
-        String textToDraw = "15";
+        String textToDraw = _text;
         FontType infoboxFontType = configManager.getConfiguration("runelite", "infoboxFontType", FontType.class);
         graphics.setFont(infoboxFontType.getFont()); // make sure we do this before calculating drawLocation
 
@@ -60,5 +62,10 @@ public class InventoryCountOverlay extends Overlay {
         OverlayUtil.renderTextLocation(graphics, drawLocation, textToDraw, Color.WHITE);
 
         return null;
+    }
+
+    public void setText(String text)
+    {
+        _text = text;
     }
 }
