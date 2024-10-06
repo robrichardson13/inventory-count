@@ -33,7 +33,7 @@ public class InventoryCountOverlay extends Overlay {
         super(plugin);
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
-        setPriority(OverlayPriority.HIGH);
+        setPriority(Overlay.PRIORITY_HIGH);
         this.client = client;
         this.config = config;
         this.configManager = configManager;
