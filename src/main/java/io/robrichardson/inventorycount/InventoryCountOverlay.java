@@ -3,8 +3,8 @@ package io.robrichardson.inventorycount;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.FontType;
 import net.runelite.client.ui.overlay.Overlay;
@@ -45,11 +45,11 @@ public class InventoryCountOverlay extends Overlay {
 
         Widget toDrawOn;
         if (client.isResized()) {
-            toDrawOn = client.getWidget(WidgetInfo.RESIZABLE_VIEWPORT_INVENTORY_TAB);
+            toDrawOn = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_INVENTORY_TAB);
             if (toDrawOn == null || toDrawOn.isHidden())
-                toDrawOn = client.getWidget(WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
+                toDrawOn = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
         } else {
-            toDrawOn = client.getWidget(WidgetInfo.FIXED_VIEWPORT_INVENTORY_TAB);
+            toDrawOn = client.getWidget(ComponentID.FIXED_VIEWPORT_INVENTORY_TAB);
         }
         if (toDrawOn == null || toDrawOn.isHidden()) return null;
 
