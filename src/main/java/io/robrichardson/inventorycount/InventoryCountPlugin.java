@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -26,6 +27,9 @@ public class InventoryCountPlugin extends Plugin
 {
 	@Inject
 	private Client client;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Inject
 	private InfoBoxManager infoBoxManager;
@@ -109,15 +113,17 @@ public class InventoryCountPlugin extends Plugin
 
 	private void updateOverlays()
 	{
-		String text = String.valueOf(openInventorySpaces());
-		if(config.renderOnInventory())
-		{
-			overlay.setText(text);
-		}
-		else
-		{
-			inventoryCountInfoBox.setText(text);
-		}
+		clientThread.invoke(() -> {
+			String text = String.valueOf(openInventorySpaces());
+			if(config.renderOnInventory())
+			{
+				overlay.setText(text);
+			}
+			else
+			{
+				inventoryCountInfoBox.setText(text);
+			}
+		});
 	}
 
 	private int openInventorySpaces()
