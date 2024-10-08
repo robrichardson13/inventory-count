@@ -115,7 +115,7 @@ public class InventoryCountPlugin extends Plugin
 	{
 		clientThread.invoke(() -> {
 			String text = String.valueOf(openInventorySpaces());
-			if(config.renderOnInventory())
+			if (config.renderOnInventory())
 			{
 				overlay.setText(text);
 			}

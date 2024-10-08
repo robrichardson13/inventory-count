@@ -19,19 +19,21 @@ public class InventoryCountOverlay extends Overlay {
 
     private final Client client;
     private final InventoryCountConfig config;
-    private final ConfigManager configManager;
+    private final FontType infoboxFontType;
 
     private String _text;
 
     @Inject
     public InventoryCountOverlay(Client client, InventoryCountPlugin plugin, InventoryCountConfig config, ConfigManager configManager) {
         super(plugin);
+
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
         setPriority(Overlay.PRIORITY_HIGH);
+
         this.client = client;
         this.config = config;
-        this.configManager = configManager;
+        this.infoboxFontType = configManager.getConfiguration("runelite", "infoboxFontType", FontType.class);
     }
 
     @Override
@@ -39,22 +41,17 @@ public class InventoryCountOverlay extends Overlay {
         if (!config.renderOnInventory()) return null;
 
         Widget inventoryWidget = getInventoryWidget(client);
-
         if (inventoryWidget == null) return null;
 
-        FontType infoboxFontType = configManager.getConfiguration("runelite", "infoboxFontType", FontType.class);
-        graphics.setFont(infoboxFontType.getFont()); // make sure we do this before calculating drawLocation
-        FontMetrics fontMetrics = graphics.getFontMetrics();
-        Rectangle bounds = inventoryWidget.getBounds();
-        TextComponent inventoryOverlayText = getInventoryOverlayText(bounds, fontMetrics, config.inventoryOverlayTextPosition(), _text);
+        graphics.setFont(infoboxFontType.getFont());
 
+        TextComponent inventoryOverlayText = getInventoryOverlayText(graphics, inventoryWidget);
         inventoryOverlayText.render(graphics);
 
         return null;
     }
 
-    public void setText(String text)
-    {
+    public void setText(String text) {
         _text = text;
     }
 
@@ -74,12 +71,10 @@ public class InventoryCountOverlay extends Overlay {
                 : client.getWidget(ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
     }
 
-    private TextComponent getInventoryOverlayText(
-            Rectangle bounds,
-            FontMetrics fontMetrics,
-            InventoryOverlayTextPositions textPositions,
-            String text) {
-        int textWidth = fontMetrics.stringWidth(text);
+    private TextComponent getInventoryOverlayText(Graphics2D graphics, Widget inventoryWidget) {
+        FontMetrics fontMetrics = graphics.getFontMetrics();
+        Rectangle bounds = inventoryWidget.getBounds();
+        int textWidth = fontMetrics.stringWidth(_text);
         int textHeight = fontMetrics.getHeight();
         int topOffset = 4;
         int x = 0;
@@ -91,7 +86,9 @@ public class InventoryCountOverlay extends Overlay {
         inventoryOverlayText.setColor(config.customInventoryOverlayTextColor());
         inventoryOverlayText.setOutline(config.renderInventoryOverlayTextOutline());
 
-        switch (textPositions) {
+        InventoryOverlayTextPositions textPosition = config.inventoryOverlayTextPosition();
+
+        switch (textPosition) {
             case Top:
                 x = (int) bounds.getCenterX() - (textWidth / 2);
                 y = (int) bounds.getCenterY() - (textHeight / 2) + topOffset;
