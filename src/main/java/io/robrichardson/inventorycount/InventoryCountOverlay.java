@@ -2,7 +2,6 @@ package io.robrichardson.inventorycount;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
-import net.runelite.api.Point;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
@@ -10,14 +9,10 @@ import net.runelite.client.config.FontType;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
-import net.runelite.client.ui.overlay.OverlayUtil;
+import net.runelite.client.ui.overlay.components.TextComponent;
 
 import javax.inject.Inject;
 import java.awt.*;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 @Slf4j
 public class InventoryCountOverlay extends Overlay {
@@ -43,23 +38,17 @@ public class InventoryCountOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         if (!config.renderOnInventory()) return null;
 
-        Widget toDrawOn;
-        if (client.isResized()) {
-            toDrawOn = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_INVENTORY_TAB);
-            if (toDrawOn == null || toDrawOn.isHidden())
-                toDrawOn = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
-        } else {
-            toDrawOn = client.getWidget(ComponentID.FIXED_VIEWPORT_INVENTORY_TAB);
-        }
-        if (toDrawOn == null || toDrawOn.isHidden()) return null;
+        Widget inventoryWidget = getInventoryWidget(client);
 
-        String textToDraw = _text;
+        if (inventoryWidget == null) return null;
+
         FontType infoboxFontType = configManager.getConfiguration("runelite", "infoboxFontType", FontType.class);
         graphics.setFont(infoboxFontType.getFont()); // make sure we do this before calculating drawLocation
+        FontMetrics fontMetrics = graphics.getFontMetrics();
+        Rectangle bounds = inventoryWidget.getBounds();
+        TextComponent inventoryOverlayText = getInventoryOverlayText(bounds, fontMetrics, config.inventoryOverlayTextPosition(), _text);
 
-        Rectangle bounds = toDrawOn.getBounds();
-        Point drawLocation = new Point((int) bounds.getCenterX() - (graphics.getFontMetrics().stringWidth(textToDraw) / 2), (int) bounds.getMaxY());
-        OverlayUtil.renderTextLocation(graphics, drawLocation, textToDraw, Color.WHITE);
+        inventoryOverlayText.render(graphics);
 
         return null;
     }
@@ -67,5 +56,62 @@ public class InventoryCountOverlay extends Overlay {
     public void setText(String text)
     {
         _text = text;
+    }
+
+    private Widget getInventoryWidget(Client client) {
+        Widget inventoryWidget = client.getWidget(ComponentID.FIXED_VIEWPORT_INVENTORY_TAB);
+
+        if (!client.isResized()) {
+            return inventoryWidget != null && !inventoryWidget.isHidden()
+                    ? inventoryWidget
+                    : null;
+        }
+
+        inventoryWidget = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_INVENTORY_TAB);
+
+        return inventoryWidget != null && !inventoryWidget.isHidden()
+                ? inventoryWidget
+                : client.getWidget(ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
+    }
+
+    private TextComponent getInventoryOverlayText(
+            Rectangle bounds,
+            FontMetrics fontMetrics,
+            InventoryOverlayTextPositions textPositions,
+            String text) {
+        int textWidth = fontMetrics.stringWidth(text);
+        int textHeight = fontMetrics.getHeight();
+        int topOffset = 4;
+        int x = 0;
+        int y = 0;
+
+        TextComponent inventoryOverlayText = new TextComponent();
+
+        inventoryOverlayText.setText(_text);
+        inventoryOverlayText.setColor(config.customInventoryOverlayTextColor());
+        inventoryOverlayText.setOutline(config.renderInventoryOverlayTextOutline());
+
+        switch (textPositions) {
+            case Top:
+                x = (int) bounds.getCenterX() - (textWidth / 2);
+                y = (int) bounds.getCenterY() - (textHeight / 2) + topOffset;
+
+                inventoryOverlayText.setPosition(new Point(x, y));
+                break;
+            case Bottom:
+                x = (int) bounds.getCenterX() - (textWidth / 2);
+                y = (int) bounds.getMaxY();
+
+                inventoryOverlayText.setPosition(new Point(x, y));
+                break;
+            default:
+                x = (int) bounds.getCenterX() - (textWidth / 2);
+                y = (int) bounds.getCenterY() + (textHeight / 2);
+
+                inventoryOverlayText.setPosition(new Point(x, y));
+                break;
+        }
+
+        return inventoryOverlayText;
     }
 }
