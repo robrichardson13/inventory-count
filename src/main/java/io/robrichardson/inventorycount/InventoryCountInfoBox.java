@@ -6,12 +6,10 @@ import net.runelite.client.ui.overlay.infobox.InfoBox;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class InventoryCountInfoBox extends InfoBox
-{
+public class InventoryCountInfoBox extends InfoBox {
     private String _text;
 
-    InventoryCountInfoBox(BufferedImage image, Plugin plugin)
-    {
+    InventoryCountInfoBox(BufferedImage image, Plugin plugin) {
         super(image, plugin);
         setTooltip("Number of open inventory spaces");
     }
@@ -26,8 +24,7 @@ public class InventoryCountInfoBox extends InfoBox
         return Color.WHITE;
     }
 
-    public void setText(String text)
-    {
+    public void setText(String text) {
         _text = text;
     }
 }
