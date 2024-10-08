@@ -62,9 +62,7 @@ public class InventoryCountOverlay extends Overlay {
             return inventoryWidget;
         }
 
-        if (client.isResized()) {
-            inventoryWidget = getResizableInventoryWidget(client);
-        }
+        inventoryWidget = getResizableInventoryWidget(client);
 
         return isInventoryWidgetVisible(inventoryWidget) ? inventoryWidget : null;
     }
