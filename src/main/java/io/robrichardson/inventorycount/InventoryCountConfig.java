@@ -33,7 +33,7 @@ public interface InventoryCountConfig extends Config {
 	@ConfigItem(
 			keyName = "customInventoryOverlayTextColor",
 			name = "Text color",
-			description = "Customize the color of the text for the overlay on the inventory icon",
+			description = "Customize the color of the inventory overlay text",
 			position = 3
 	)
 	default Color customInventoryOverlayTextColor() { return Color.WHITE; }
