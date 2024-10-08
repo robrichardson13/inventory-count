@@ -58,17 +58,29 @@ public class InventoryCountOverlay extends Overlay {
     private Widget getInventoryWidget(Client client) {
         Widget inventoryWidget = client.getWidget(ComponentID.FIXED_VIEWPORT_INVENTORY_TAB);
 
-        if (!client.isResized()) {
-            return inventoryWidget != null && !inventoryWidget.isHidden()
-                    ? inventoryWidget
-                    : null;
+        if (isInventoryWidgetVisible(inventoryWidget)) {
+            return inventoryWidget;
         }
 
-        inventoryWidget = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_INVENTORY_TAB);
+        if (client.isResized()) {
+            inventoryWidget = getResizableInventoryWidget(client);
+        }
 
-        return inventoryWidget != null && !inventoryWidget.isHidden()
-                ? inventoryWidget
-                : client.getWidget(ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
+        return isInventoryWidgetVisible(inventoryWidget) ? inventoryWidget : null;
+    }
+
+    private Widget getResizableInventoryWidget(Client client) {
+        Widget inventoryWidget = client.getWidget(ComponentID.RESIZABLE_VIEWPORT_INVENTORY_TAB);
+
+        if (isInventoryWidgetVisible(inventoryWidget)) {
+            return inventoryWidget;
+        }
+
+        return client.getWidget(ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
+    }
+
+    private boolean isInventoryWidgetVisible(Widget inventoryWidget) {
+        return inventoryWidget != null && !inventoryWidget.isHidden();
     }
 
     private TextComponent getInventoryOverlayText(Graphics2D graphics, Widget inventoryWidget) {
