@@ -16,130 +16,117 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ImageUtil;
+
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 @Slf4j
 @PluginDescriptor(
-		name = "Inventory Count"
+        name = "Inventory Count"
 )
-public class InventoryCountPlugin extends Plugin
-{
-	@Inject
-	private Client client;
+public class InventoryCountPlugin extends Plugin {
+    @Inject
+    private Client client;
 
-	@Inject
-	private ClientThread clientThread;
+    @Inject
+    private ClientThread clientThread;
 
-	@Inject
-	private InfoBoxManager infoBoxManager;
+    @Inject
+    private InfoBoxManager infoBoxManager;
 
-	@Inject
-	private InventoryCountOverlay overlay;
+    @Inject
+    private InventoryCountOverlay overlay;
 
-	@Inject
-	private OverlayManager overlayManager;
+    @Inject
+    private OverlayManager overlayManager;
 
-	@Inject
-	private InventoryCountConfig config;
+    @Inject
+    private InventoryCountConfig config;
 
-	private static final BufferedImage INVENTORY_IMAGE;
+    private static final BufferedImage INVENTORY_IMAGE;
 
-	private static final int INVENTORY_SIZE = 28;
+    private static final int INVENTORY_SIZE = 28;
 
-	@Getter
-	private InventoryCountInfoBox inventoryCountInfoBox;
+    @Getter
+    private InventoryCountInfoBox inventoryCountInfoBox;
 
-	static
-	{
-		INVENTORY_IMAGE = ImageUtil.loadImageResource(InventoryCountPlugin.class, "inventory_icon.png");
-	}
+    static {
+        INVENTORY_IMAGE = ImageUtil.loadImageResource(InventoryCountPlugin.class, "inventory_icon.png");
+    }
 
-	@Override
-	protected void startUp() throws Exception
-	{
-		if (config.renderOnInventory())  {
-			overlayManager.add(overlay);
-			updateOverlays();
-		} else {
-			addInfoBox();
-		}
-	}
+    @Override
+    protected void startUp() throws Exception {
+        if (config.renderOnInventory()) {
+            overlayManager.add(overlay);
+            updateOverlays();
+        } else {
+            addInfoBox();
+        }
+    }
 
-	@Override
-	protected void shutDown() throws Exception
-	{
-		if (config.renderOnInventory())  {
-			overlayManager.remove(overlay);
-		} else {
-			removeInfoBox();
-		}
-	}
+    @Override
+    protected void shutDown() throws Exception {
+        if (config.renderOnInventory()) {
+            overlayManager.remove(overlay);
+        } else {
+            removeInfoBox();
+        }
+    }
 
-	@Subscribe
-	public void onConfigChanged(ConfigChanged event) {
-		if (!InventoryCountConfig.GROUP.equals(event.getGroup())) return;
+    @Subscribe
+    public void onConfigChanged(ConfigChanged event) {
+        if (!InventoryCountConfig.GROUP.equals(event.getGroup())) return;
 
-		if ("renderOnInventory".equals(event.getKey())) {
-			if (config.renderOnInventory()) {
-				removeInfoBox();
-				overlayManager.add(overlay);
-				updateOverlays();
-			} else {
-				overlayManager.remove(overlay);
-				addInfoBox();
-			}
-		}
-	}
+        if ("renderOnInventory".equals(event.getKey())) {
+            if (config.renderOnInventory()) {
+                removeInfoBox();
+                overlayManager.add(overlay);
+                updateOverlays();
+            } else {
+                overlayManager.remove(overlay);
+                addInfoBox();
+            }
+        }
+    }
 
-	@Provides
-	InventoryCountConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(InventoryCountConfig.class);
-	}
+    @Provides
+    InventoryCountConfig provideConfig(ConfigManager configManager) {
+        return configManager.getConfig(InventoryCountConfig.class);
+    }
 
-	private void addInfoBox()
-	{
-		inventoryCountInfoBox = new InventoryCountInfoBox(INVENTORY_IMAGE, this);
-		updateOverlays();
-		infoBoxManager.addInfoBox(inventoryCountInfoBox);
-	}
+    private void addInfoBox() {
+        inventoryCountInfoBox = new InventoryCountInfoBox(INVENTORY_IMAGE, this);
+        updateOverlays();
+        infoBoxManager.addInfoBox(inventoryCountInfoBox);
+    }
 
-	private void removeInfoBox()
-	{
-		infoBoxManager.removeInfoBox(inventoryCountInfoBox);
-		inventoryCountInfoBox = null;
-	}
+    private void removeInfoBox() {
+        infoBoxManager.removeInfoBox(inventoryCountInfoBox);
+        inventoryCountInfoBox = null;
+    }
 
-	private void updateOverlays()
-	{
-		clientThread.invoke(() -> {
-			String text = String.valueOf(openInventorySpaces());
-			if(config.renderOnInventory())
-			{
-				overlay.setText(text);
-			}
-			else
-			{
-				inventoryCountInfoBox.setText(text);
-			}
-		});
-	}
+    private void updateOverlays() {
+        clientThread.invoke(() -> {
+            String text = String.valueOf(openInventorySpaces());
+            if (config.renderOnInventory()) {
+                overlay.setText(text);
+            } else {
+                inventoryCountInfoBox.setText(text);
+            }
+        });
+    }
 
-	private int openInventorySpaces()
-	{
-		ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
-		Item[] items = container == null ? new Item[0] : container.getItems();
-		int usedSpaces = (int) Arrays.stream(items).filter(p -> p.getId() != -1).count();
-		return INVENTORY_SIZE - usedSpaces;
-	}
+    private int openInventorySpaces() {
+        ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+        Item[] items = container == null ? new Item[0] : container.getItems();
+        int usedSpaces = (int) Arrays.stream(items).filter(p -> p.getId() != -1).count();
+        return INVENTORY_SIZE - usedSpaces;
+    }
 
-	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged event)
-	{
-		if (event.getContainerId() == InventoryID.INVENTORY.getId())
-		{
-			updateOverlays();
-		}
-	}
+    @Subscribe
+    public void onItemContainerChanged(ItemContainerChanged event) {
+        if (event.getContainerId() == InventoryID.INVENTORY.getId()) {
+            updateOverlays();
+        }
+    }
 }
