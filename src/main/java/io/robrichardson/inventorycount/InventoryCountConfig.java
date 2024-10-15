@@ -49,4 +49,24 @@ public interface InventoryCountConfig extends Config {
     default InventoryOverlayTextPositions inventoryOverlayTextPosition() {
         return InventoryOverlayTextPositions.Bottom;
     }
+
+    @ConfigItem(
+            keyName = "dynamicInventoryOverlayColor",
+            name = "Dynamic text color",
+            description = "Toggle to enable or disable the text color changing based on free inventory slots",
+            position = 5
+    )
+    default boolean dynamicInventoryOverlayColor() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "customInventoryOverlayFontSize",
+            name = "Text size",
+            description = "Adjust the font size of the inventory overlay text",
+            position = 6
+    )
+    default int customInventoryOverlayFontSize() {
+        return 16;
+    }
 }
