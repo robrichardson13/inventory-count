@@ -21,7 +21,8 @@ public class InventoryCountOverlay extends Overlay {
     private final InventoryCountConfig config;
     private final FontType infoboxFontType;
 
-    private String _text;
+    private String _text = "";
+    private Color _color = Color.WHITE; // Default color
 
     @Inject
     public InventoryCountOverlay(Client client, InventoryCountPlugin plugin, InventoryCountConfig config, ConfigManager configManager) {
@@ -38,12 +39,27 @@ public class InventoryCountOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        if (!config.renderOnInventory()) return null;
+        if (!config.renderOnInventory()) {
+            return null;
+        }
 
         Widget inventoryWidget = getInventoryWidget(client);
         if (inventoryWidget == null) return null;
 
-        graphics.setFont(infoboxFontType.getFont());
+        InventoryOverlayTextFontSizes fontSizeEnum = config.customInventoryOverlayFontSize();
+        int fontSize = fontSizeEnum.getSize();
+
+        Font infoboxFont = infoboxFontType.getFont();
+
+        Font font;
+        if (config.useCustomFont()) {
+            InventoryOverlayTextFonts selectedFontEnum = config.customFont();
+            font = new Font(selectedFontEnum.getFontName(), selectedFontEnum.getFontStyle(), fontSize);
+        } else {
+            font = new Font(infoboxFont.getFontName(), Font.PLAIN, fontSize);
+        }
+
+        graphics.setFont(font);
 
         TextComponent inventoryOverlayText = getInventoryOverlayText(graphics, inventoryWidget);
         inventoryOverlayText.render(graphics);
@@ -53,6 +69,10 @@ public class InventoryCountOverlay extends Overlay {
 
     public void setText(String text) {
         _text = text;
+    }
+
+    public void setColor(Color color) {
+        _color = color;
     }
 
     private Widget getInventoryWidget(Client client) {
@@ -93,7 +113,7 @@ public class InventoryCountOverlay extends Overlay {
         TextComponent inventoryOverlayText = new TextComponent();
 
         inventoryOverlayText.setText(_text);
-        inventoryOverlayText.setColor(config.customInventoryOverlayTextColor());
+        inventoryOverlayText.setColor(_color);
         inventoryOverlayText.setOutline(config.renderInventoryOverlayTextOutline());
 
         InventoryOverlayTextPositions textPosition = config.inventoryOverlayTextPosition();
