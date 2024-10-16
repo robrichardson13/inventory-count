@@ -39,7 +39,7 @@ public class InventoryCountOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        if (!config.renderOnInventory()) {
+        if (!config.renderInventoryOverlay()) {
             return null;
         }
 

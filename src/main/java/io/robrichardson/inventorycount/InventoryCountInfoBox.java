@@ -8,15 +8,20 @@ import java.awt.image.BufferedImage;
 
 public class InventoryCountInfoBox extends InfoBox {
     private String _text;
+    private final InventoryCountConfig config;
 
-    InventoryCountInfoBox(BufferedImage image, Plugin plugin) {
+    InventoryCountInfoBox(BufferedImage image, Plugin plugin, InventoryCountConfig config) {
         super(image, plugin);
+        this.config = config;
         setTooltip("Number of open inventory spaces");
     }
 
     @Override
     public String getText() {
-        return _text;
+        if (config.renderInventoryInfoBox()) {
+            return _text;
+        }
+        return null;
     }
 
     @Override
@@ -25,6 +30,8 @@ public class InventoryCountInfoBox extends InfoBox {
     }
 
     public void setText(String text) {
-        _text = text;
+        if (config.renderInventoryInfoBox()) {
+            _text = text;
+        }
     }
 }
