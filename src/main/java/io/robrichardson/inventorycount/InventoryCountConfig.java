@@ -95,7 +95,7 @@ public interface InventoryCountConfig extends Config {
             keyName = "customInventoryOverlayFont",
             name = "Custom font",
             description = "Choose a custom font for the inventory counter overlay",
-            position = 1,
+            position = 3,
             section = fontSection
     )
     default InventoryOverlayTextFonts customFont() {
@@ -106,7 +106,7 @@ public interface InventoryCountConfig extends Config {
             keyName = "customInventoryOverlayFontToggle",
             name = "Use Custom Font",
             description = "Toggle using a custom font or the default plugin font",
-            position = 3,
+            position = 1,
             section = fontSection
     )
     default boolean useCustomFont() {
