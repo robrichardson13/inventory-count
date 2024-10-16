@@ -84,7 +84,7 @@ public interface InventoryCountConfig extends Config {
             keyName = "customInventoryOverlayFontSize",
             name = "Text size",
             description = "Adjust the font size of the inventory overlay text",
-            position = 2,
+            position = 3,
             section = fontSection
     )
     default InventoryOverlayTextFontSizes customInventoryOverlayFontSize() {
@@ -95,7 +95,7 @@ public interface InventoryCountConfig extends Config {
             keyName = "customInventoryOverlayFont",
             name = "Custom font",
             description = "Choose a custom font for the inventory counter overlay",
-            position = 3,
+            position = 2,
             section = fontSection
     )
     default InventoryOverlayTextFonts customFont() {
@@ -104,7 +104,7 @@ public interface InventoryCountConfig extends Config {
 
     @ConfigItem(
             keyName = "customInventoryOverlayFontToggle",
-            name = "Use Custom Font",
+            name = "Use custom font",
             description = "Toggle using a custom font or the default plugin font",
             position = 1,
             section = fontSection
