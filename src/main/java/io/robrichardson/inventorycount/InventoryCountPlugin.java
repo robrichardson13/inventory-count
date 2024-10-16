@@ -57,23 +57,20 @@ public class InventoryCountPlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
-        toggleOverlayOrInfoBox();
+        toggleOverlayAndInfoBox();
     }
 
     @Override
     protected void shutDown() throws Exception {
-        if (config.renderOnInventory()) {
-            overlayManager.remove(overlay);
-        } else {
-            removeInfoBox();
-        }
+        overlayManager.remove(overlay);
+        removeInfoBox();
     }
 
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
         if (!InventoryCountConfig.GROUP.equals(event.getGroup())) return;
 
-        toggleOverlayOrInfoBox();
+        toggleOverlayAndInfoBox();
     }
 
     @Provides
@@ -81,22 +78,27 @@ public class InventoryCountPlugin extends Plugin {
         return configManager.getConfig(InventoryCountConfig.class);
     }
 
-    private void toggleOverlayOrInfoBox() {
+    private void toggleOverlayAndInfoBox() {
         clientThread.invoke(() -> {
-            if (config.renderOnInventory()) {
+            if (config.renderInventoryOverlay()) {
                 overlayManager.add(overlay);
-                removeInfoBox();
             } else {
                 overlayManager.remove(overlay);
-                addInfoBox();
             }
+
+            if (config.renderInventoryInfoBox()) {
+                addInfoBox();
+            } else {
+                removeInfoBox();
+            }
+
             updateOverlays();
         });
     }
 
     private void addInfoBox() {
         if (inventoryCountInfoBox == null) {
-            inventoryCountInfoBox = new InventoryCountInfoBox(INVENTORY_IMAGE, this);
+            inventoryCountInfoBox = new InventoryCountInfoBox(INVENTORY_IMAGE, this, config); // Pass config
             infoBoxManager.addInfoBox(inventoryCountInfoBox);
         }
     }

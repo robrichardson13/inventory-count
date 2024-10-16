@@ -11,21 +11,30 @@ import java.awt.*;
 public interface InventoryCountConfig extends Config {
     String GROUP = "InventoryCount";
 
-    // General Settings
     @ConfigItem(
-            keyName = "renderOnInventory",
-            name = "Render on inventory icon",
-            description = "Disable for infobox, enable for text overlay on inventory icon",
+            keyName = "renderInventoryOverlay",
+            name = "Toggle inventory counter",
+            description = "Toggle for rendering the inventory count overlay",
             position = 1
     )
-    default boolean renderOnInventory() {
+    default boolean renderInventoryOverlay() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "renderInventoryInfoBox",
+            name = "Toggle inventory box",
+            description = "Toggle for rendering the inventory info box",
+            position = 2
+    )
+    default boolean renderInventoryInfoBox() {
         return false;
     }
 
     @ConfigSection(
             name = "Text Settings",
             description = "Change your text color, outline and positioning",
-            position = 2
+            position = 3
     )
     String textSection = "Text Settings";
 
@@ -76,7 +85,7 @@ public interface InventoryCountConfig extends Config {
     @ConfigSection(
             name = "Custom Font Settings",
             description = "Settings for customizing the font of the inventory counter overlay",
-            position = 3
+            position = 4
     )
     String fontSection = "Custom Font Settings";
 
