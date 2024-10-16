@@ -46,8 +46,19 @@ public class InventoryCountOverlay extends Overlay {
         Widget inventoryWidget = getInventoryWidget(client);
         if (inventoryWidget == null) return null;
 
-        int fontSize = config.customInventoryOverlayFontSize();
-        Font font = new Font("Arial", Font.PLAIN, fontSize);
+        InventoryOverlayTextFontSizes fontSizeEnum = config.customInventoryOverlayFontSize();
+        int fontSize = fontSizeEnum.getSize();
+
+        Font infoboxFont = infoboxFontType.getFont();
+
+        Font font;
+        if (config.useCustomFont()) {
+            InventoryOverlayTextFonts selectedFontEnum = config.customFont();
+            font = new Font(selectedFontEnum.getFontName(), selectedFontEnum.getFontStyle(), fontSize);
+        } else {
+            font = new Font(infoboxFont.getFontName(), Font.PLAIN, fontSize);
+        }
+
         graphics.setFont(font);
 
         TextComponent inventoryOverlayText = getInventoryOverlayText(graphics, inventoryWidget);

@@ -131,11 +131,11 @@ public class InventoryCountPlugin extends Plugin {
         int freeSlots = openInventorySpaces();
 
         if (config.dynamicInventoryOverlayColor()) {
-            if (freeSlots > 14) {
+            if (freeSlots > InventoryOverlaySlotSizes.HIGH) {
                 return Color.GREEN;
-            } else if (freeSlots > 7) {
+            } else if (freeSlots > InventoryOverlaySlotSizes.MEDIUM) {
                 return Color.YELLOW;
-            } else if (freeSlots > 3) {
+            } else if (freeSlots > InventoryOverlaySlotSizes.LOW) {
                 return new Color(255, 165, 0); // Light orange
             } else {
                 return Color.RED;
@@ -145,7 +145,7 @@ public class InventoryCountPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onItemContainerChanged(ItemContainerChanged event) {
+    private void onItemContainerChanged(ItemContainerChanged event) {
         if (event.getContainerId() == InventoryID.INVENTORY.getId()) {
             updateOverlays();
         }
