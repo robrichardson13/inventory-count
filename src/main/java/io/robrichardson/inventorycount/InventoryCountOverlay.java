@@ -100,40 +100,28 @@ public class InventoryCountOverlay extends Overlay {
     private TextComponent getInventoryOverlayText(Graphics2D graphics, Widget inventoryWidget) {
         FontMetrics fontMetrics = graphics.getFontMetrics();
         Rectangle bounds = inventoryWidget.getBounds();
-        int textWidth = fontMetrics.stringWidth(_text);
-        int textHeight = fontMetrics.getHeight();
-        int topOffset = 4;
-        int x = 0;
-        int y = 0;
-
+        InventoryOverlayTextPositions textPosition = config.inventoryOverlayTextPosition();
         TextComponent inventoryOverlayText = new TextComponent();
 
         inventoryOverlayText.setText(_text);
         inventoryOverlayText.setColor(_color);
         inventoryOverlayText.setOutline(config.renderInventoryOverlayTextOutline());
 
-        InventoryOverlayTextPositions textPosition = config.inventoryOverlayTextPosition();
+        int textWidth = fontMetrics.stringWidth(_text);
+        int textHeight = fontMetrics.getHeight() - fontMetrics.getMaxDescent();
+        int x = (int) bounds.getCenterX() - (textWidth / 2);
+        int y = (int) bounds.getCenterY() + (textHeight / 2);
 
         switch (textPosition) {
             case Top:
-                x = (int) bounds.getCenterX() - (textWidth / 2);
-                y = (int) bounds.getCenterY() - (textHeight / 2) + topOffset;
-
-                inventoryOverlayText.setPosition(new Point(x, y));
+                y = (int) bounds.getMinY() + textHeight;
                 break;
             case Bottom:
-                x = (int) bounds.getCenterX() - (textWidth / 2);
                 y = (int) bounds.getMaxY();
-
-                inventoryOverlayText.setPosition(new Point(x, y));
-                break;
-            default:
-                x = (int) bounds.getCenterX() - (textWidth / 2);
-                y = (int) bounds.getCenterY() + (textHeight / 2);
-
-                inventoryOverlayText.setPosition(new Point(x, y));
                 break;
         }
+
+        inventoryOverlayText.setPosition(new Point(x, y));
 
         return inventoryOverlayText;
     }
