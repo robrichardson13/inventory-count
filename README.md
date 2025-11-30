@@ -1,4 +1,8 @@
-# Inventory Count [![Plugin Installs](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/inventory-count)](https://runelite.net/plugin-hub/robrichardson13)
+# Inventory Count
+
+![image](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/inventory-count)
+![image](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/inventory-count)
+
 ##### A plugin for [RuneLite](https://runelite.net/)
 
 
