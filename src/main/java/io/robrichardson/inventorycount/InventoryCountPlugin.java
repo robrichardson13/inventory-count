@@ -126,27 +126,35 @@ public class InventoryCountPlugin extends Plugin {
     }
 
     private void updateOverlays() {
-        String text = String.valueOf(openInventorySpaces());
-        Color textColor = getInventoryTextColor();
+        int usedSlots = usedInventorySlots();
+        int freeSlots = INVENTORY_SIZE - usedSlots;
+        Color textColor = getInventoryTextColor(freeSlots);
 
-        overlay.setText(text);
+        overlay.setMode(config.inventoryCountMode());
+        overlay.setFreeText(String.valueOf(freeSlots));
+        overlay.setUsedText(String.valueOf(usedSlots));
         overlay.setColor(textColor);
 
         if (inventoryCountInfoBox != null) {
-            inventoryCountInfoBox.setText(text);
+            inventoryCountInfoBox.setCounts(freeSlots, usedSlots);
         }
     }
 
     public int openInventorySpaces() {
+        return INVENTORY_SIZE - usedInventorySlots();
+    }
+
+    public int usedInventorySlots() {
         ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
         Item[] items = container == null ? new Item[0] : container.getItems();
-        int usedSpaces = (int) Arrays.stream(items).filter(p -> p.getId() != -1).count();
-        return INVENTORY_SIZE - usedSpaces;
+        return (int) Arrays.stream(items).filter(p -> p.getId() != -1).count();
     }
 
     public Color getInventoryTextColor() {
-        int freeSlots = openInventorySpaces();
+        return getInventoryTextColor(openInventorySpaces());
+    }
 
+    private Color getInventoryTextColor(int freeSlots) {
         if (config.dynamicInventoryOverlayColor()) {
             if (freeSlots > InventoryOverlaySlotSizes.HIGH) {
                 return Color.GREEN;

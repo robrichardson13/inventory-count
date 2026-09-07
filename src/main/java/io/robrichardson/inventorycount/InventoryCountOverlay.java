@@ -21,7 +21,9 @@ public class InventoryCountOverlay extends Overlay {
     private final InventoryCountConfig config;
     private final FontType infoboxFontType;
 
-    private String _text = "";
+    private InventoryCountMode _mode = InventoryCountMode.FREE;
+    private String _freeText = "";
+    private String _usedText = "";
     private Color _color = Color.WHITE; // Default color
 
     @Inject
@@ -57,14 +59,46 @@ public class InventoryCountOverlay extends Overlay {
 
         graphics.setFont(infoboxFont);
 
-        TextComponent inventoryOverlayText = getInventoryOverlayText(graphics, inventoryWidget);
-        inventoryOverlayText.render(graphics);
+        InventoryOverlayTextPositions configuredPosition = config.inventoryOverlayTextPosition();
+
+        switch (_mode) {
+            case USED:
+                renderTextAt(graphics, inventoryWidget, _usedText, configuredPosition);
+                break;
+            case BOTH:
+                InventoryOverlayTextPositions freePosition = configuredPosition == InventoryOverlayTextPositions.Center
+                        ? InventoryOverlayTextPositions.Top
+                        : configuredPosition;
+                InventoryOverlayTextPositions usedPosition = opposite(freePosition);
+
+                renderTextAt(graphics, inventoryWidget, _freeText, freePosition);
+                renderTextAt(graphics, inventoryWidget, _usedText, usedPosition);
+                break;
+            case FREE:
+            default:
+                renderTextAt(graphics, inventoryWidget, _freeText, configuredPosition);
+                break;
+        }
 
         return null;
     }
 
-    public void setText(String text) {
-        _text = text;
+    private InventoryOverlayTextPositions opposite(InventoryOverlayTextPositions position) {
+        return position == InventoryOverlayTextPositions.Top
+                ? InventoryOverlayTextPositions.Bottom
+                : InventoryOverlayTextPositions.Top;
+    }
+
+    public void setMode(InventoryCountMode mode) {
+        _mode = mode;
+    }
+
+    public void setFreeText(String text) {
+        _freeText = text;
+    }
+
+    public void setUsedText(String text) {
+        _usedText = text;
     }
 
     public void setColor(Color color) {
@@ -97,17 +131,21 @@ public class InventoryCountOverlay extends Overlay {
         return inventoryWidget != null && !inventoryWidget.isHidden();
     }
 
-    private TextComponent getInventoryOverlayText(Graphics2D graphics, Widget inventoryWidget) {
+    private void renderTextAt(Graphics2D graphics, Widget inventoryWidget, String text, InventoryOverlayTextPositions textPosition) {
+        TextComponent inventoryOverlayText = getInventoryOverlayText(graphics, inventoryWidget, text, textPosition);
+        inventoryOverlayText.render(graphics);
+    }
+
+    private TextComponent getInventoryOverlayText(Graphics2D graphics, Widget inventoryWidget, String text, InventoryOverlayTextPositions textPosition) {
         FontMetrics fontMetrics = graphics.getFontMetrics();
         Rectangle bounds = inventoryWidget.getBounds();
-        InventoryOverlayTextPositions textPosition = config.inventoryOverlayTextPosition();
         TextComponent inventoryOverlayText = new TextComponent();
 
-        inventoryOverlayText.setText(_text);
+        inventoryOverlayText.setText(text);
         inventoryOverlayText.setColor(_color);
         inventoryOverlayText.setOutline(config.renderInventoryOverlayTextOutline());
 
-        int textWidth = fontMetrics.stringWidth(_text);
+        int textWidth = fontMetrics.stringWidth(text);
         int textHeight = fontMetrics.getHeight() - fontMetrics.getMaxDescent();
         int x = (int) bounds.getCenterX() - (textWidth / 2);
         int y = (int) bounds.getCenterY() + (textHeight / 2);
