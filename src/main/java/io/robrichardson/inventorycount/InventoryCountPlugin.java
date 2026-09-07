@@ -51,17 +51,27 @@ public class InventoryCountPlugin extends Plugin {
     @Getter
     private InventoryCountInfoBox inventoryCountInfoBox;
 
+    /**
+     * Whether the plugin is currently running. startUp/shutDown run on the Swing EDT while the
+     * add/remove work is queued onto the client thread, so a queued add can execute after
+     * shutDown() has already run. The queued task checks this flag and bails out in that case,
+     * otherwise the overlay/infobox would be re-added with no plugin left to remove them.
+     */
+    private volatile boolean running;
+
     static {
         INVENTORY_IMAGE = ImageUtil.loadImageResource(InventoryCountPlugin.class, "inventory_icon.png");
     }
 
     @Override
     protected void startUp() throws Exception {
+        running = true;
         toggleOverlayAndInfoBox();
     }
 
     @Override
     protected void shutDown() throws Exception {
+        running = false;
         overlayManager.remove(overlay);
         removeInfoBox();
     }
@@ -80,6 +90,11 @@ public class InventoryCountPlugin extends Plugin {
 
     private void toggleOverlayAndInfoBox() {
         clientThread.invoke(() -> {
+            if (!running) {
+                // Plugin was disabled before this task ran; don't re-add anything.
+                return;
+            }
+
             if (config.renderInventoryOverlay()) {
                 overlayManager.add(overlay);
             } else {
