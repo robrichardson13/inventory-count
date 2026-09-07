@@ -19,6 +19,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
 	testImplementation 'junit:junit:4.12'
+	testImplementation 'org.mockito:mockito-core:4.11.0'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
@@ -29,4 +30,24 @@ sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
+}
+
+task runClient(type: JavaExec) {
+	group = 'application'
+	description = 'Run RuneLite with the plugin loaded (isolated dev environment)'
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'io.robrichardson.inventorycount.InventoryCountPluginTest'
+	jvmArgs = [
+		'-ea',
+		'--add-exports', 'java.desktop/com.apple.eawt=ALL-UNNAMED',
+		'--add-opens', 'java.desktop/com.apple.eawt=ALL-UNNAMED',
+		'--add-opens', 'java.desktop/sun.awt=ALL-UNNAMED',
+		'--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+	]
+	args = [
+		'--developer-mode',
+		'--debug',
+		'--profile=dev',
+		'--sessionfile=dev-session.properties'
+	]
 }
