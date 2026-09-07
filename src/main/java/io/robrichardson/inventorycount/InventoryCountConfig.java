@@ -82,6 +82,17 @@ public interface InventoryCountConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "inventoryCountMode",
+            name = "Count mode",
+            description = "Free: slots remaining (28 -> 0). Used: slots filled (0 -> 28). Both: free count at the chosen text position and used count at the opposite end (Center puts free at top, used at bottom).",
+            position = 5,
+            section = textSection
+    )
+    default InventoryCountMode inventoryCountMode() {
+        return InventoryCountMode.FREE;
+    }
+
     @ConfigSection(
             name = "Custom Font Settings",
             description = "Settings for customizing the font of the inventory counter overlay",
